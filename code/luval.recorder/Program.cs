@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,14 +18,23 @@ namespace luval.recorder
             var recorder = new Recorder();
             recorder.Stopped += Recorder_Stopped;
 
-            Console.CancelKeyPress += (sender, eArgs) => {
-                _quitEvent.Set();
+            Console.CancelKeyPress += (sender, eArgs) =>
+            {
+                recorder.Stop();
                 eArgs.Cancel = true;
+                
             };
 
-            recorder.Start(info);
+            recorder.Start(new FileInfo("recording.mp4"), 1);
 
-            _quitEvent.WaitOne();
+            //_quitEvent.WaitOne();
+
+            Console.WriteLine("press any key to complete the recording");
+            Console.ReadKey();
+
+            recorder.Stop();
+
+            Console.WriteLine("Recording completed. File saved in {0}", info.FileName);
 
         }
 

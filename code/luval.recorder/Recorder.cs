@@ -13,21 +13,23 @@ namespace luval.recorder
 {
     public class Recorder
     {
-        private Timer _timer;
         private VideoFileWriter _writer;
         private Size _screenSize;
         private double _minutesElapsed;
         private int _maxDuration;
         private DateTime _startUtc;
+        private uint _frameIndex;
+        private RollingList<byte[]> _frames;
+        private FileInfo _file;
 
-        public string SessionName { get; private set; }
 
         public event EventHandler Stopped;
+        public Timer Timer { get; private set; }
 
         public Recorder()
         {
-            _timer = new Timer();
-            _timer.Elapsed += Timer_Tick;
+            Timer = new Timer();
+            Timer.Elapsed += Timer_Tick;
             _screenSize = new Size(System.Windows.Forms.SystemInformation.VirtualScreen.Width,
                 System.Windows.Forms.SystemInformation.VirtualScreen.Height);
         }
@@ -39,57 +41,92 @@ namespace luval.recorder
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            var rec = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-            //var index = default(uint);
+            var rec = new Rectangle(0, 0, _screenSize.Width, _screenSize.Height);
+
             using (Bitmap bp = new Bitmap(rec.Width,
                                             rec.Height))
             {
                 using (Graphics g = Graphics.FromImage(bp))
                 {
                     g.CopyFromScreen(rec.X, rec.Y, 0, 0, bp.Size, CopyPixelOperation.SourceCopy);
-                    _writer.WriteVideoFrame(bp);
-                    //index++;
-                    _minutesElapsed = DateTime.UtcNow.Subtract(_startUtc).TotalMinutes;
-                    if (_minutesElapsed >= _maxDuration)
+                    using (var stream = new MemoryStream())
                     {
-                        _timer.Enabled = false;
-                        Stop();
+                        bp.Save(stream, ImageFormat.Jpeg);
+                        _frames.Add(stream.ToArray());
                     }
+                    _minutesElapsed = DateTime.UtcNow.Subtract(_startUtc).TotalMinutes;
+                    //if (_minutesElapsed >= _maxDuration)
+                    //{
+                    //    Timer.Enabled = false;
+                    //    if (!Timer.Enabled)
+                    //        Stop();
+                    //}
                 }
             }
         }
 
-
-
-
-        public void Start(RecordingInfo info)
+        public void Start()
         {
-            var bitRate = ((_screenSize.Width * _screenSize.Height) * (int)info.FramesPerSecond);
-            _writer = new VideoFileWriter()
-            {
-                FrameRate = info.FramesPerSecond,
-                Height = _screenSize.Height,
-                Width = _screenSize.Width,
-                VideoCodec = VideoCodec.Mpeg4,
+            Start(new FileInfo(string.Format("recording-{0}.mp4", Guid.NewGuid())), 3, 100);
+        }
 
-            };
-            _writer.Open(info.FileName);
-            //_writer.Open(info.FileName, _screenSize.Width, _screenSize.Height, 25, VideoCodec.MPEG4, 1000000);
-            //_timer.Interval = Convert.ToInt32(1000 / info.FramesPerSecond);
-            _timer.Interval = 30;
-            _maxDuration = info.MaxDurationInMinutes;
-            SessionName = info.SessionName;
-            _timer.Start();
+        public void Start(FileInfo file)
+        {
+            Start(file, 3, 100);
+        }
+
+        public void Start(FileInfo file, short maxDurationInMinutes)
+        {
+            Start(file, maxDurationInMinutes, 100);
+        }
+
+        public void Start(FileInfo file, short maxDurationInMinutes, short frameIntervalInMs)
+        {
+            if (frameIntervalInMs < 10 || frameIntervalInMs > 1000) throw new ArgumentOutOfRangeException(string.Format("frameIntervalInMs has to be between 10 and 1000"));
+            if(maxDurationInMinutes <=0 || maxDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("maxDurationInMinutes has to be between 1 and 30"));
+
+            _file = file;
+            _screenSize.Width = _screenSize.Width % 2 == 0 ? _screenSize.Width : _screenSize.Width - 1;
+            _screenSize.Height = _screenSize.Height % 2 == 0 ? _screenSize.Height : _screenSize.Height - 1;
+            Timer.Interval = frameIntervalInMs;
+            _maxDuration = maxDurationInMinutes;
+            var arraySize = ((1000 / frameIntervalInMs) * maxDurationInMinutes) * 60;
+            _frames = new RollingList<byte[]>(arraySize);
+            Timer.Start();
             _startUtc = DateTime.UtcNow;
 
         }
 
+        private void CreateFile()
+        {
+            _frameIndex = 0;
+
+            if (_file.Exists) _file.Delete();
+
+            var frameRate = (int)(1000 / (Timer.Interval));
+            _writer = new VideoFileWriter();
+            _writer.Open(_file.FullName, _screenSize.Width, _screenSize.Height, frameRate, VideoCodec.MPEG4);
+
+            foreach (var frame in _frames)
+            {
+                using (var stream = new MemoryStream(frame))
+                {
+                    var img = Image.FromStream(stream);
+                    _writer.WriteVideoFrame(new Bitmap(img));
+                }
+                _frameIndex++;
+            }
+
+            _writer.Close();
+        }
+
         public void Stop()
         {
-            _timer.Enabled = false;
-            _timer.Stop();
-            _timer.Dispose();
-            _writer.Close();
+            Timer.Enabled = false;
+            Timer.Stop();
+            Timer.Dispose();
+            System.Threading.Thread.Sleep(1000);
+            CreateFile();
             OnStopped(new EventArgs());
         }
     }
