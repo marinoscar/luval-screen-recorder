@@ -55,46 +55,24 @@ namespace luval.recorder
                         _frames.Add(stream.ToArray());
                     }
                     _minutesElapsed = DateTime.UtcNow.Subtract(_startUtc).TotalMinutes;
-                    //if (_minutesElapsed >= _maxDuration)
-                    //{
-                    //    Timer.Enabled = false;
-                    //    if (!Timer.Enabled)
-                    //        Stop();
-                    //}
                 }
             }
         }
 
-        public void Start()
+        public void Start(RecordingInfo info)
         {
-            Start(new FileInfo(string.Format("recording-{0}.mp4", Guid.NewGuid())), 3, 100);
-        }
+            if (info.IntervalTimeInMs < 10 || info.IntervalTimeInMs > 1000) throw new ArgumentOutOfRangeException(string.Format("Interval has to be between 10 and 1000"));
+            if (info.MaxDurationInMinutes <= 0 || info.MaxDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("Duration has to be between 1 and 30"));
 
-        public void Start(FileInfo file)
-        {
-            Start(file, 3, 100);
-        }
-
-        public void Start(FileInfo file, short maxDurationInMinutes)
-        {
-            Start(file, maxDurationInMinutes, 100);
-        }
-
-        public void Start(FileInfo file, short maxDurationInMinutes, short frameIntervalInMs)
-        {
-            if (frameIntervalInMs < 10 || frameIntervalInMs > 1000) throw new ArgumentOutOfRangeException(string.Format("frameIntervalInMs has to be between 10 and 1000"));
-            if(maxDurationInMinutes <=0 || maxDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("maxDurationInMinutes has to be between 1 and 30"));
-
-            _file = file;
+            _file = new FileInfo(info.FileName);
             _screenSize.Width = _screenSize.Width % 2 == 0 ? _screenSize.Width : _screenSize.Width - 1;
             _screenSize.Height = _screenSize.Height % 2 == 0 ? _screenSize.Height : _screenSize.Height - 1;
-            Timer.Interval = frameIntervalInMs;
-            _maxDuration = maxDurationInMinutes;
-            var arraySize = ((1000 / frameIntervalInMs) * maxDurationInMinutes) * 60;
-            _frames = new RollingList<byte[]>(arraySize);
+            Timer.Interval = info.IntervalTimeInMs;
+            _maxDuration = info.MaxDurationInMinutes;
+            var arraySize = ((1000 / Timer.Interval) * _maxDuration) * 60;
+            _frames = new RollingList<byte[]>((int)arraySize);
             Timer.Start();
             _startUtc = DateTime.UtcNow;
-
         }
 
         private void CreateFile()

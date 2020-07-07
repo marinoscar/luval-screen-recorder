@@ -11,13 +11,13 @@ namespace luval.recorder
         public RecordingInfo()
         {
             SessionName = Guid.NewGuid().ToString();
-            FileName = string.Format("ScreenRecording-{0}.avi", SessionName);
-            MaxDurationInMinutes = 10;
-            FramesPerSecond = 50;
+            FileName = string.Format("{0}\\ScreenRecording-{1}.mp4", Environment.CurrentDirectory,  SessionName);
+            MaxDurationInMinutes = 5;
+            IntervalTimeInMs = 100;
         }
         public string FileName { get; set; }
         public int MaxDurationInMinutes { get; set; }
-        public int FramesPerSecond { get; set; }
+        public int IntervalTimeInMs { get; set; }
         public string SessionName { get; set; } 
     }
 }
