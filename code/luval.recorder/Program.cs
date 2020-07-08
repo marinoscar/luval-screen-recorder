@@ -18,7 +18,7 @@ namespace luval.recorder
     {
 
         #region constants
-        
+
         public static string AppName = "Luval Recorder";
 
         [DllImport("kernel32.dll")]
@@ -56,33 +56,58 @@ namespace luval.recorder
         /// <summary>
         /// Executes an action on the application
         /// </summary>
-        /// <param name="arguments"></param>
-        static void StartRecording(ConsoleSwitches arguments)
+        /// <param name="args"></param>
+        static void StartRecording(ConsoleSwitches args)
         {
             Console.WriteLine("Recording Started");
             var recorder = new Recorder();
-            var info = arguments.ToRecordingInfo();
+            var info = args.ToRecordingInfo();
             recorder.Start(info);
 
             Console.Title = String.Format("{0}: Recording", AppName);
 
+            if (!info.UseNamedPipes)
+                WaitForConsoleSignal();
+            else
+            {
+                WriteLineInfo("Using pipe {0}", info.SessionName);
+                WaitForNamedPipesSignal(info);
+            }
+
+            recorder.Stop();
+
+            Console.Title = String.Format("{0}: Completed", AppName);
+
+            var fileInfo = new FileInfo(info.FileName);
+            var framesPerSecond = Math.Round((double)(1000 / info.IntervalTimeInMs), 0);
+            WriteLineInfo("");
+            WriteLineWarning("Completed in file: {0}", fileInfo.FullName);
+            WriteLineWarning("File size........: {0} MB", Math.Round((double)(fileInfo.Length / (1024 * 1024)), 2));
+            WriteLineWarning("Frames per second: {0}", framesPerSecond);
+            WriteLineWarning("Video duration...: {0} min", Math.Round((framesPerSecond * recorder.Frames.Count)/60, 2));
+            WriteLineInfo("");
+        }
+
+        /// <summary>
+        /// Waits for a named piped signal to finish the recording
+        /// </summary>
+        private static void WaitForNamedPipesSignal(RecordingInfo info)
+        {
+            var pipeServer = new NamedPipesServer(info.SessionName, "stop");
+            pipeServer.Start(info.MaxRecordingMinutes);
+        }
+
+        /// <summary>
+        /// Waits for text to be entered in the console to finish the recording
+        /// </summary>
+        private static void WaitForConsoleSignal()
+        {
             var isStopSignalRecieved = false;
             while (!isStopSignalRecieved)
             {
                 Console.WriteLine("Enter the word STOP top finish the recording");
                 isStopSignalRecieved = Console.ReadLine().ToLowerInvariant() == "stop";
             }
-
-            recorder.Stop();
-            Console.Title = String.Format("{0}: Completed", AppName);
-
-            var fileInfo = new FileInfo(info.FileName);
-            WriteLineInfo("");
-            WriteLineWarning("Completed in file: {0}", fileInfo.FullName);
-            WriteLineWarning("File size........: {0} MB", Math.Round((double)(fileInfo.Length / (1024 * 1024)), 2));
-            WriteLineWarning("Frames per second: {0}", Math.Round((double)(1000 / info.IntervalTimeInMs), 0));
-            WriteLineWarning("Video duration...: {0} min", info.MaxDurationInMinutes);
-            WriteLineInfo("");
         }
 
         /// <summary>
