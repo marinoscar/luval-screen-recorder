@@ -12,8 +12,8 @@ namespace luval.recorder
         {
             SessionName = Guid.NewGuid().ToString();
             FileName = string.Format("{0}\\ScreenRecording-{1}.mp4", Environment.CurrentDirectory,  SessionName);
-            MaxDurationInMinutes = 5;
-            IntervalTimeInMs = 100;
+            MaxDurationInMinutes = 3;
+            IntervalTimeInMs = 250;
         }
         public string FileName { get; set; }
         public int MaxDurationInMinutes { get; set; }

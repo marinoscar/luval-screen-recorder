@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace luval.recorder
 {
@@ -14,18 +16,41 @@ namespace luval.recorder
     /// </summary>
     class Program
     {
+
+        #region constants
+        
+        public static string AppName = "Luval Recorder";
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        const int SW_HIDE = 0;
+        const int SW_SHOW = 5;
+        const int SW_MINIMIZE = 6;
+
+        #endregion
+
         /// <summary>
         /// Main entry point to the application
         /// </summary>
         /// <param name="args">Arguments</param>
         static void Main(string[] args)
         {
+            Console.Title = String.Format("{0}: Starting", AppName);
+
+            var handle = GetConsoleWindow();
+            // hide window
+            ShowWindow(handle, SW_MINIMIZE);
+
             /// Provides a way to parse the arguments <see cref="https://gist.github.com/marinoscar/d84265533b242a8a5e7eb74cdd50b7e5"/>
             var arguments = new ConsoleSwitches(args);
 
             RunAction(() =>
             {
-                DoAction(arguments);
+                StartRecording(arguments);
 
             }, true);
         }
@@ -34,9 +59,32 @@ namespace luval.recorder
         /// Executes an action on the application
         /// </summary>
         /// <param name="arguments"></param>
-        static void DoAction(ConsoleSwitches arguments)
+        static void StartRecording(ConsoleSwitches arguments)
         {
-            Console.WriteLine("Hello World");
+            Console.WriteLine("Recording Started");
+            var recorder = new Recorder();
+            var info = arguments.ToRecordingInfo();
+            recorder.Start(info);
+
+            Console.Title = String.Format("{0}: Recording", AppName);
+
+            var isStopSignalRecieved = false;
+            while (!isStopSignalRecieved)
+            {
+                Console.WriteLine("Enter the word STOP top finish the recording");
+                isStopSignalRecieved = Console.ReadLine().ToLowerInvariant() == "stop";
+            }
+
+            recorder.Stop();
+            Console.Title = String.Format("{0}: Completed", AppName);
+
+            var fileInfo = new FileInfo(info.FileName);
+            WriteLineInfo("");
+            WriteLineWarning("Completed in file: {0}", fileInfo.FullName);
+            WriteLineWarning("File size........: {0} MB", Math.Round((double)(fileInfo.Length / (1024 * 1024)), 2));
+            WriteLineWarning("Frames per second: {0}", Math.Round((double)(1000 / info.IntervalTimeInMs), 0));
+            WriteLineWarning("Video duration...: {0} min", info.MaxDurationInMinutes);
+            WriteLineInfo("");
         }
 
         /// <summary>
@@ -51,7 +99,9 @@ namespace luval.recorder
             }
             catch (Exception exception)
             {
+                Console.Title = String.Format("{0}: Failed", AppName);
                 WriteLineError(exception.ToString());
+
             }
             finally
             {
@@ -167,8 +217,18 @@ namespace luval.recorder
         public static void WriteLineError(string message)
         {
             WriteLine(ConsoleColor.Red, message);
+            WriteErrorToEventLog(message);
         }
 
         #endregion
+
+        public static void WriteErrorToEventLog(string errorMessage)
+        {
+            using (var eventLog = new EventLog("Application"))
+            {
+                eventLog.Source = "Application";
+                eventLog.WriteEntry(string.Format("{0}:{1}", AppName, errorMessage), EventLogEntryType.Error, 101, 1);
+            }
+        }
     }
 }
