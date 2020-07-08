@@ -13,17 +13,13 @@ namespace luval.recorder
 {
     public class Recorder
     {
-        private VideoFileWriter _writer;
         private Size _screenSize;
         private double _minutesElapsed;
-        private int _maxDuration;
         private DateTime _startUtc;
-        private uint _frameIndex;
-        private RollingList<byte[]> _frames;
-        private FileInfo _file;
+        private RecordingInfo _info;
 
 
-        public event EventHandler Stopped;
+        public RollingList<byte[]> Frames { get; private set; }
         public Timer Timer { get; private set; }
 
         public Recorder()
@@ -34,10 +30,6 @@ namespace luval.recorder
                 System.Windows.Forms.SystemInformation.VirtualScreen.Height);
         }
 
-        protected virtual void OnStopped(EventArgs e)
-        {
-            Stopped?.Invoke(this, e);
-        }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
@@ -52,7 +44,7 @@ namespace luval.recorder
                     using (var stream = new MemoryStream())
                     {
                         bp.Save(stream, ImageFormat.Jpeg);
-                        _frames.Add(stream.ToArray());
+                        Frames.Add(stream.ToArray());
                     }
                     _minutesElapsed = DateTime.UtcNow.Subtract(_startUtc).TotalMinutes;
                 }
@@ -63,39 +55,37 @@ namespace luval.recorder
         {
             if (info.IntervalTimeInMs < 10 || info.IntervalTimeInMs > 1000) throw new ArgumentOutOfRangeException(string.Format("Interval has to be between 10 and 1000"));
             if (info.MaxDurationInMinutes <= 0 || info.MaxDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("Duration has to be between 1 and 30"));
+            if (info.UseNamedPipes && string.IsNullOrWhiteSpace(info.SessionName)) throw new ArgumentOutOfRangeException(string.Format("Session name cannot be null or empty if named pipes are going to be used"));
 
-            _file = new FileInfo(info.FileName);
+            _info = info;
+
+            //the recorder requires the screen size to not be an odd number
             _screenSize.Width = _screenSize.Width % 2 == 0 ? _screenSize.Width : _screenSize.Width - 1;
             _screenSize.Height = _screenSize.Height % 2 == 0 ? _screenSize.Height : _screenSize.Height - 1;
+
             Timer.Interval = info.IntervalTimeInMs;
-            _maxDuration = info.MaxDurationInMinutes;
-            var arraySize = ((1000 / Timer.Interval) * _maxDuration) * 60;
-            _frames = new RollingList<byte[]>((int)arraySize);
+            var arraySize = ((1000 / Timer.Interval) * info.MaxDurationInMinutes) * 60;
+            Frames = new RollingList<byte[]>((int)arraySize);
             Timer.Start();
             _startUtc = DateTime.UtcNow;
         }
 
         private void CreateFile()
         {
-            _frameIndex = 0;
-
-            if (_file.Exists) _file.Delete();
-
             var frameRate = (int)(1000 / (Timer.Interval));
-            _writer = new VideoFileWriter();
-            _writer.Open(_file.FullName, _screenSize.Width, _screenSize.Height, frameRate, VideoCodec.MPEG4);
-
-            foreach (var frame in _frames)
+            using (var writer = new VideoFileWriter())
             {
-                using (var stream = new MemoryStream(frame))
+                writer.Open(_info.FileName, _screenSize.Width, _screenSize.Height, frameRate, VideoCodec.MPEG4);
+                foreach (var frame in Frames)
                 {
-                    var img = Image.FromStream(stream);
-                    _writer.WriteVideoFrame(new Bitmap(img));
+                    using (var stream = new MemoryStream(frame))
+                    {
+                        var img = Image.FromStream(stream);
+                        writer.WriteVideoFrame(new Bitmap(img));
+                    }
                 }
-                _frameIndex++;
-            }
-
-            _writer.Close();
+                writer.Close();
+            }  
         }
 
         public void Stop()
@@ -105,7 +95,6 @@ namespace luval.recorder
             Timer.Dispose();
             System.Threading.Thread.Sleep(1000);
             CreateFile();
-            OnStopped(new EventArgs());
         }
     }
 }
