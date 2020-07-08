@@ -27,9 +27,9 @@ namespace luval.recorder
         [DllImport("user32.dll")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        const int SW_HIDE = 0;
-        const int SW_SHOW = 5;
-        const int SW_MINIMIZE = 6;
+        public const int SW_HIDE = 0;
+        public const int SW_SHOW = 5;
+        public const int SW_MINIMIZE = 6;
 
         #endregion
 
@@ -41,12 +41,10 @@ namespace luval.recorder
         {
             Console.Title = String.Format("{0}: Starting", AppName);
 
-            var handle = GetConsoleWindow();
-            // hide window
-            ShowWindow(handle, SW_MINIMIZE);
-
-            /// Provides a way to parse the arguments <see cref="https://gist.github.com/marinoscar/d84265533b242a8a5e7eb74cdd50b7e5"/>
             var arguments = new ConsoleSwitches(args);
+
+            var handle = GetConsoleWindow();
+            ShowWindow(handle, arguments.ToRecordingInfo().ConsoleScreenStartup);
 
             RunAction(() =>
             {
