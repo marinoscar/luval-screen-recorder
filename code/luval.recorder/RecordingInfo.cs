@@ -18,7 +18,7 @@ namespace luval.recorder
             MaxDurationInMinutes = 3;
             IntervalTimeInMs = 250;
             MaxRecordingMinutes = 120;
-            ConsoleScreenStartup = Program.SW_MINIMIZE;
+            WindowMode = Program.SW_MINIMIZE;
         }
         /// <summary>
         /// Full file path for the recording
@@ -47,6 +47,6 @@ namespace luval.recorder
         /// <summary>
         /// Indicates the screen position, 0 = Hide, 5 = Show or 6 minimize
         /// </summary>
-        public int ConsoleScreenStartup { get; set; }
+        public int WindowMode { get; set; }
     }
 }

@@ -56,9 +56,9 @@ namespace luval.recorder
             if (ContainsSwitch("/interval")) res.IntervalTimeInMs = Convert.ToInt32(this["/interval"]);
             if (ContainsSwitch("/maxRecording")) res.MaxRecordingMinutes = Convert.ToInt32(this["/maxRecording"]);
             if (ContainsSwitch("/usePipes")) res.UseNamedPipes = (!string.IsNullOrWhiteSpace(this["/usePipes"]) && (new[] { "yes", "true", "1", "y", "t"}).Contains(this["/usePipes"].ToLowerInvariant()));
-            if (ContainsSwitch("/screenSize") && (new[] {0, 5, 6 }).Contains(Convert.ToInt32(this["/screenSize"])))
+            if (ContainsSwitch("/windowMode") && (new[] {0, 5, 6 }).Contains(Convert.ToInt32(this["/windowMode"])))
             {
-                res.ConsoleScreenStartup = Convert.ToInt32(this["/screenSize"]);
+                res.WindowMode = Convert.ToInt32(this["/windowMode"]);
             }
             return res;
         }

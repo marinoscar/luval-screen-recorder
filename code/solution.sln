@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.49
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder", "luval.recorder\luval.recorder.csproj", "{68ADF58B-0920-48A8-83CB-7E6C291F6B68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.pipe.client", "luval.recorder.pipe.client\luval.recorder.pipe.client.csproj", "{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{68ADF58B-0920-48A8-83CB-7E6C291F6B68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68ADF58B-0920-48A8-83CB-7E6C291F6B68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68ADF58B-0920-48A8-83CB-7E6C291F6B68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2C3A5D65-B7BD-4CE4-8EBA-BDDB2C38DEC5}
 	EndGlobalSection
 EndGlobal

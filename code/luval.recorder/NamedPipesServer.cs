@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Pipes;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 
 namespace luval.recorder
 {
@@ -41,14 +42,16 @@ namespace luval.recorder
             var startTs = DateTime.UtcNow;
             using (var server = new NamedPipeServerStream(_pipeName))
             {
-                //server.WaitForConnection();
+                server.WaitForConnection();
                 Thread.Sleep(2000); //waits for server to start
                 using (var stream = new StreamReader(server))
                 {
                     while (true)
                     {
                         var line = stream.ReadLine();
-                        if(!string.IsNullOrWhiteSpace(line) && line.ToLowerInvariant() == _stopWord)
+                        Trace.TraceInformation("Signal recieved {0}", line);
+                        if (!string.IsNullOrWhiteSpace(line) && line.ToLowerInvariant() == _stopWord)
+                            return;
                         if (DateTime.UtcNow.Subtract(startTs).TotalMinutes > timeoutInMinutes)
                             throw new TimeoutException(string.Format("No message was recieved after {0} minutes", timeoutInMinutes));
                     }

@@ -39,12 +39,14 @@ namespace luval.recorder
         /// <param name="args">Arguments</param>
         static void Main(string[] args)
         {
+            Trace.Listeners.Add(new ConsoleTraceListener());
+
             Console.Title = String.Format("{0}: Starting", AppName);
 
             var arguments = new ConsoleSwitches(args);
 
             var handle = GetConsoleWindow();
-            ShowWindow(handle, arguments.ToRecordingInfo().ConsoleScreenStartup);
+            ShowWindow(handle, arguments.ToRecordingInfo().WindowMode);
 
             RunAction(() =>
             {
@@ -72,6 +74,7 @@ namespace luval.recorder
             {
                 WriteLineInfo("Using pipe {0}", info.SessionName);
                 WaitForNamedPipesSignal(info);
+                WriteLineInfo("Stop signal recieved on pipe {0}", info.SessionName);
             }
 
             recorder.Stop();

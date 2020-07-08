@@ -14,7 +14,8 @@ namespace luval.recorder.pipe.client
     {
         static void Main(string[] args)
         {
-            var pipeName = "";
+            Trace.Listeners.Add(new ConsoleTraceListener());
+            var pipeName = "Luval-Recorder-Session";
             Console.WriteLine("Enter the message to send to pipe {0}", pipeName);
             var message = Console.ReadLine();
             var result = SendMessageToPipe(pipeName, message, 10000, 5, 2000);
