@@ -61,7 +61,7 @@ namespace luval.recorder
         /// <param name="args"></param>
         static void StartRecording(ConsoleSwitches args)
         {
-            Console.WriteLine("Recording Started");
+            WriteLine("Recording Started");
             var recorder = new Recorder();
             var info = args.ToRecordingInfo();
             recorder.Start(info);
@@ -108,7 +108,7 @@ namespace luval.recorder
             var isStopSignalRecieved = false;
             while (!isStopSignalRecieved)
             {
-                Console.WriteLine("Enter the word STOP top finish the recording");
+                WriteLine("Enter the word STOP top finish the recording");
                 isStopSignalRecieved = Console.ReadLine().ToLowerInvariant() == "stop";
             }
         }
@@ -163,10 +163,7 @@ namespace luval.recorder
         /// <param name="arg">The arguments to format the string</param>
         public static void WriteLine(ConsoleColor color, string format, params object[] arg)
         {
-            var current = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(format, arg);
-            Console.ForegroundColor = current;
+            WriteLine(color, string.Format(format, arg));
         }
 
         /// <summary>
@@ -185,12 +182,20 @@ namespace luval.recorder
         /// <summary>
         /// Writes a new line to the console
         /// </summary>
-        /// <param name="color">The forground color of the message</param>
+        /// <param name="message">The string to format</param>
+        public static void WriteLine(string message)
+        {
+            WriteLine(Console.ForegroundColor, message);
+        }
+
+        /// <summary>
+        /// Writes a new line to the console
+        /// </summary>
         /// <param name="format">The string to format</param>
         /// <param name="arg">The arguments to format the string</param>
         public static void WriteLineInfo(string format, params object[] arg)
         {
-            Console.WriteLine(format, arg);
+            WriteLine(string.Format(format, arg));
         }
 
         /// <summary>
@@ -200,7 +205,7 @@ namespace luval.recorder
         /// <param name="message">The string to format</param>
         public static void WriteLineInfo(string message)
         {
-            Console.WriteLine(message);
+            WriteLine(message);
         }
 
         /// <summary>
