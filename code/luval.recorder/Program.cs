@@ -180,6 +180,7 @@ namespace luval.recorder
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ForegroundColor = current;
+            if (_info != null && _info.LogInfoMessages) Trace.TraceInformation(message);
         }
 
         /// <summary>
