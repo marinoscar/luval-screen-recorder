@@ -18,7 +18,16 @@ namespace luval.recorder.pipe.client
             var pipeName = "Luval-Recorder-Session";
             Console.WriteLine("Enter the message to send to pipe {0}", pipeName);
             var message = Console.ReadLine();
-            var result = SendMessageToPipe(pipeName, message, 10000, 5, 2000);
+            var result = SendMessageToPipe(pipeName, message, 30000, 5, 2000);
+            if (!result)
+            {
+                Console.WriteLine("Failed to send message {0} on pipe {1}", message, pipeName);
+                return;
+            }
+
+            Console.WriteLine("Waiting for completed signal");
+
+            StartServer(pipeName, "complete", 10);
 
         }
 
