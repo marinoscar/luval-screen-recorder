@@ -19,6 +19,7 @@ namespace luval.recorder.pipe.client
             Console.WriteLine("Enter the message to send to pipe {0}", pipeName);
             var message = Console.ReadLine();
             var result = SendMessageToPipe(pipeName, message, 10000, 5, 2000);
+
         }
 
         private static bool SendMessageToPipe(string pipe, string message, int timeoutInMs, int connectionRetries, int retryWaitInMs)
@@ -54,6 +55,29 @@ namespace luval.recorder.pipe.client
                 }
             }
             return success;
+        }
+
+        private static void StartServer(string pipeName, string stopWord, int timeoutInMinutes)
+        {
+            if (string.IsNullOrWhiteSpace(stopWord)) throw new ArgumentException("stopWord cannot be null or empty");
+            var startTs = DateTime.UtcNow;
+            using (var server = new NamedPipeServerStream(pipeName))
+            {
+                server.WaitForConnection();
+                Thread.Sleep(2000); //waits for server to start
+                using (var stream = new StreamReader(server))
+                {
+                    while (true)
+                    {
+                        var line = stream.ReadLine();
+                        Trace.TraceInformation("Signal recieved {0}", line);
+                        if (!string.IsNullOrWhiteSpace(line) && line.ToLowerInvariant() == stopWord.ToLowerInvariant())
+                            return;
+                        if (DateTime.UtcNow.Subtract(startTs).TotalMinutes > timeoutInMinutes)
+                            throw new TimeoutException(string.Format("No message was recieved after {0} minutes", timeoutInMinutes));
+                    }
+                }
+            }
         }
     }
 }

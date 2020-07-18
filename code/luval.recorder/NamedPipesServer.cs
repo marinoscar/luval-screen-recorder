@@ -37,7 +37,7 @@ namespace luval.recorder
         /// Starts the server and will stop only until the stop word is recieved or the timeout is completed
         /// </summary>
         /// <param name="timeoutInMinutes">The number of muinutes until the timeout is met</param>
-        public void Start(int timeoutInMinutes)
+        public void StartServer(int timeoutInMinutes)
         {
             var startTs = DateTime.UtcNow;
             using (var server = new NamedPipeServerStream(_pipeName))
@@ -57,6 +57,50 @@ namespace luval.recorder
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Sends a message back to the pipe
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="timeoutInMs">The timeout time in milliseconds</param>
+        /// <param name="connectionRetries">Number of retries in case of a connection failure</param>
+        /// <param name="retryWaitInMs">Number of milliseconds to wait before a retry take place</param>
+        /// <returns>True of the message was sent, otherwise false</returns>
+        public bool SendMessageToPipe(string message, int timeoutInMs, int connectionRetries, int retryWaitInMs)
+        {
+            var success = false;
+            using (var client = new NamedPipeClientStream(_pipeName))
+            {
+                client.Connect(timeoutInMs);
+                using (var writer = new StreamWriter(client))
+                {
+
+                    for (int i = 0; i < connectionRetries; i++)
+                    {
+                        if (client.IsConnected)
+                        {
+                            writer.WriteLine(message);
+                            try
+                            {
+                                writer.Flush();
+                                success = true;
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                Trace.TraceError("Server unavailable: {0}", ex);
+                            }
+                        }
+                        if (!success)
+                            Thread.Sleep(retryWaitInMs);
+                    }
+                    if (!success)
+                        Trace.TraceError("Failed after {0} retries", connectionRetries);
+                }
+            }
+            return success;
         }
     }
 }

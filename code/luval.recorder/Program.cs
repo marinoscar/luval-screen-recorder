@@ -52,7 +52,7 @@ namespace luval.recorder
             {
                 StartRecording(arguments);
 
-            }, true);
+            }, false);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace luval.recorder
         private static void WaitForNamedPipesSignal(RecordingInfo info)
         {
             var pipeServer = new NamedPipesServer(info.SessionName, "stop");
-            pipeServer.Start(info.MaxRecordingMinutes);
+            pipeServer.StartServer(info.MaxRecordingMinutes);
         }
 
         /// <summary>
