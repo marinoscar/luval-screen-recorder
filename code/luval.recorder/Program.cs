@@ -79,8 +79,9 @@ namespace luval.recorder
                 WaitForNamedPipesSignal();
                 WriteLineInfo("Stop signal recieved on pipe {0}", _info.SessionName);
             }
-
             recorder.Stop();
+            if (!_info.UseNamedPipes)
+                SendCompleteNamedPipesSignal();
 
             Console.Title = String.Format("{0}: Completed", AppName);
 
@@ -90,7 +91,7 @@ namespace luval.recorder
             WriteLineWarning("Completed in file: {0}", fileInfo.FullName);
             WriteLineWarning("File size........: {0} MB", Math.Round((double)(fileInfo.Length / (1024 * 1024)), 2));
             WriteLineWarning("Frames per second: {0}", framesPerSecond);
-            WriteLineWarning("Video duration...: {0} min", Math.Round((framesPerSecond * recorder.Frames.Count)/60, 2));
+            WriteLineWarning("Video duration...: {0} min", Math.Round((framesPerSecond * recorder.Frames.Count) / 60, 2));
             WriteLineInfo("");
         }
 
@@ -101,6 +102,12 @@ namespace luval.recorder
         {
             var pipeServer = new NamedPipesServer(_info.SessionName, "stop");
             pipeServer.StartServer(_info.MaxRecordingMinutes);
+        }
+
+        private static void SendCompleteNamedPipesSignal()
+        {
+            var pipeServer = new NamedPipesServer(_info.SessionName, "complete");
+            pipeServer.SendMessageToPipe("complete", 30000, 5, 1000);
         }
 
         /// <summary>
