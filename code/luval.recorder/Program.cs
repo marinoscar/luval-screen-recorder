@@ -33,24 +33,29 @@ namespace luval.recorder
 
         #endregion
 
+        private static RecordingInfo _info;
+
         /// <summary>
         /// Main entry point to the application
         /// </summary>
         /// <param name="args">Arguments</param>
         static void Main(string[] args)
         {
+            var arguments = new ConsoleSwitches(args);
+            _info = arguments.ToRecordingInfo();
+
             Trace.Listeners.Add(new ConsoleTraceListener());
+            if (_info.LogInfoMessages)
+                Trace.Listeners.Add(new EventLogTraceListener());
 
             Console.Title = String.Format("{0}: Starting", AppName);
 
-            var arguments = new ConsoleSwitches(args);
-
             var handle = GetConsoleWindow();
-            ShowWindow(handle, arguments.ToRecordingInfo().WindowMode);
+            ShowWindow(handle, _info.WindowMode);
 
             RunAction(() =>
             {
-                StartRecording(arguments);
+                StartRecording();
 
             }, false);
         }
@@ -58,31 +63,29 @@ namespace luval.recorder
         /// <summary>
         /// Executes an action on the application
         /// </summary>
-        /// <param name="args"></param>
-        static void StartRecording(ConsoleSwitches args)
+        static void StartRecording()
         {
             WriteLine("Recording Started");
             var recorder = new Recorder();
-            var info = args.ToRecordingInfo();
-            recorder.Start(info);
+            recorder.Start(_info);
 
             Console.Title = String.Format("{0}: Recording", AppName);
 
-            if (!info.UseNamedPipes)
+            if (!_info.UseNamedPipes)
                 WaitForConsoleSignal();
             else
             {
-                WriteLineInfo("Using pipe {0}", info.SessionName);
-                WaitForNamedPipesSignal(info);
-                WriteLineInfo("Stop signal recieved on pipe {0}", info.SessionName);
+                WriteLineInfo("Using pipe {0}", _info.SessionName);
+                WaitForNamedPipesSignal();
+                WriteLineInfo("Stop signal recieved on pipe {0}", _info.SessionName);
             }
 
             recorder.Stop();
 
             Console.Title = String.Format("{0}: Completed", AppName);
 
-            var fileInfo = new FileInfo(info.FileName);
-            var framesPerSecond = Math.Round((double)(1000 / info.IntervalTimeInMs), 0);
+            var fileInfo = new FileInfo(_info.FileName);
+            var framesPerSecond = Math.Round((double)(1000 / _info.IntervalTimeInMs), 0);
             WriteLineInfo("");
             WriteLineWarning("Completed in file: {0}", fileInfo.FullName);
             WriteLineWarning("File size........: {0} MB", Math.Round((double)(fileInfo.Length / (1024 * 1024)), 2));
@@ -94,10 +97,10 @@ namespace luval.recorder
         /// <summary>
         /// Waits for a named piped signal to finish the recording
         /// </summary>
-        private static void WaitForNamedPipesSignal(RecordingInfo info)
+        private static void WaitForNamedPipesSignal()
         {
-            var pipeServer = new NamedPipesServer(info.SessionName, "stop");
-            pipeServer.StartServer(info.MaxRecordingMinutes);
+            var pipeServer = new NamedPipesServer(_info.SessionName, "stop");
+            pipeServer.StartServer(_info.MaxRecordingMinutes);
         }
 
         /// <summary>

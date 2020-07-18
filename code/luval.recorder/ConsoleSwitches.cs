@@ -60,6 +60,7 @@ namespace luval.recorder
             {
                 res.WindowMode = Convert.ToInt32(this["/windowMode"]);
             }
+            res.LogInfoMessages = ContainsSwitch("/logInfo");
             return res;
         }
     }

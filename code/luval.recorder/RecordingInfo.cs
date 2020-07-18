@@ -48,5 +48,10 @@ namespace luval.recorder
         /// Indicates the screen position, 0 = Hide, 5 = Show or 6 minimize
         /// </summary>
         public int WindowMode { get; set; }
+
+        /// <summary>
+        /// Indicates if all messages sent to the console would be Traced in the event viewer
+        /// </summary>
+        public bool LogInfoMessages { get; set; }
     }
 }
