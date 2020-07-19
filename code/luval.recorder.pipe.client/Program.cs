@@ -1,4 +1,5 @@
-﻿using System;
+﻿using luval.recorder.pipes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,17 +18,32 @@ namespace luval.recorder.pipe.client
             Trace.Listeners.Add(new ConsoleTraceListener());
             var pipeName = "Luval-Recorder-Session";
             Console.WriteLine("Enter the message to send to pipe {0}", pipeName);
+            
+            var npWriter = new NamedPipesHelper(pipeName, TimeSpan.FromMinutes(2d));
             var message = Console.ReadLine();
-            var result = SendMessageToPipe(pipeName, message, 30000, 5, 2000);
+            //var result = SendMessageToPipe(pipeName, message, 30000, 5, 2000);
+            var result = npWriter.SendMessage(message, 5, 2000);
             if (!result)
             {
                 Console.WriteLine("Failed to send message {0} on pipe {1}", message, pipeName);
                 return;
             }
+            Console.WriteLine("Message succesful");
 
             Console.WriteLine("Waiting for completed signal");
 
-            StartServer(pipeName, "complete", 10);
+            var npReader = new NamedPipesHelper(pipeName + "_BACK", TimeSpan.FromMinutes(2d));
+
+            npReader.ReadPipe((line) => {
+                var expected = "complete";
+                var res = !string.IsNullOrEmpty(line) && line.Trim().ToLowerInvariant().Equals(expected.ToLowerInvariant());
+                Console.WriteLine("Line Recieved: {0}, Expected Value: {1}, The operation was: {2}", line.Trim(), expected, res);
+                return res;
+            });
+
+            //StartServer(pipeName + "_BACK", "complete", 2);
+
+            Console.WriteLine("Process completed");
 
         }
 
@@ -39,7 +55,7 @@ namespace luval.recorder.pipe.client
                 client.Connect(timeoutInMs);
                 using (var writer = new StreamWriter(client))
                 {
-                    
+
                     for (int i = 0; i < connectionRetries; i++)
                     {
                         if (client.IsConnected)
@@ -56,7 +72,7 @@ namespace luval.recorder.pipe.client
                                 Trace.TraceError("Server unavailable: {0}", ex);
                             }
                         }
-                        if(!success)
+                        if (!success)
                             Thread.Sleep(retryWaitInMs);
                     }
                     if (!success)
@@ -69,24 +85,46 @@ namespace luval.recorder.pipe.client
         private static void StartServer(string pipeName, string stopWord, int timeoutInMinutes)
         {
             if (string.IsNullOrWhiteSpace(stopWord)) throw new ArgumentException("stopWord cannot be null or empty");
-            var startTs = DateTime.UtcNow;
+
+            Console.WriteLine("Creating server {0}", DateTime.Now);
             using (var server = new NamedPipeServerStream(pipeName))
             {
-                server.WaitForConnection();
-                Thread.Sleep(2000); //waits for server to start
-                using (var stream = new StreamReader(server))
+                Console.WriteLine("Created server at {0}", DateTime.Now);
+
+                var line = string.Empty;
+                while (true)
                 {
-                    while (true)
+                    Trace.TraceInformation("Waiting for signal");
+                    Console.WriteLine("Waiting started at {0}", DateTime.Now);
+                    var task = Task.Run(() =>
                     {
-                        var line = stream.ReadLine();
-                        Trace.TraceInformation("Signal recieved {0}", line);
-                        if (!string.IsNullOrWhiteSpace(line) && line.ToLowerInvariant() == stopWord.ToLowerInvariant())
-                            return;
-                        if (DateTime.UtcNow.Subtract(startTs).TotalMinutes > timeoutInMinutes)
-                            throw new TimeoutException(string.Format("No message was recieved after {0} minutes", timeoutInMinutes));
+                        line = ReadStream(server);
+                    });
+                    Console.WriteLine("Task Status: {0} at {1}", task.Status, DateTime.Now);
+                    if (!task.Wait(TimeSpan.FromMinutes(timeoutInMinutes)))
+                        throw new TimeoutException(string.Format("Operation was not completed after {0} minutes", timeoutInMinutes));
+
+                    Trace.TraceInformation("Signal recieved {0}", line);
+                    Console.WriteLine("Signal recieved: {0} at {1}", line, DateTime.Now);
+                    Console.WriteLine("Task Status: {0} at {1}", task.Status, DateTime.Now);
+
+                    if (!string.IsNullOrWhiteSpace(line) && line.ToLowerInvariant() == stopWord.ToLowerInvariant())
+                    {
+                        Console.WriteLine("********** SUCCESS!!!!!! ********** ");
+                        return;
                     }
                 }
             }
+        }
+
+        private static string ReadStream(NamedPipeServerStream pipe)
+        {
+            string line;
+            pipe.WaitForConnection();
+            StreamReader sr = new StreamReader(pipe);
+            line = sr.ReadToEnd();
+            pipe.Disconnect();
+            return line;
         }
     }
 }

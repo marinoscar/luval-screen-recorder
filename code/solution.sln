@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.pipe.client"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.uipath.recorder", "luval.uipath\activity\luval.uipath.recorder.csproj", "{F888EB06-412D-4B26-86BE-8301A518C50C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.pipes", "luval.recorder.pipes\luval.recorder.pipes.csproj", "{B40E5498-B0BA-4C5A-AE7D-C32D2309384E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F888EB06-412D-4B26-86BE-8301A518C50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F888EB06-412D-4B26-86BE-8301A518C50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F888EB06-412D-4B26-86BE-8301A518C50C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B40E5498-B0BA-4C5A-AE7D-C32D2309384E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B40E5498-B0BA-4C5A-AE7D-C32D2309384E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B40E5498-B0BA-4C5A-AE7D-C32D2309384E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B40E5498-B0BA-4C5A-AE7D-C32D2309384E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

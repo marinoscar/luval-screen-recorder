@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using luval.recorder.pipes;
 
 namespace luval.recorder
 {
@@ -79,8 +80,10 @@ namespace luval.recorder
                 WaitForNamedPipesSignal();
                 WriteLineInfo("Stop signal recieved on pipe {0}", _info.SessionName);
             }
+            
             recorder.Stop();
-            if (!_info.UseNamedPipes)
+            
+            if (_info.UseNamedPipes)
                 SendCompleteNamedPipesSignal();
 
             Console.Title = String.Format("{0}: Completed", AppName);
@@ -100,14 +103,27 @@ namespace luval.recorder
         /// </summary>
         private static void WaitForNamedPipesSignal()
         {
-            var pipeServer = new NamedPipesServer(_info.SessionName, "stop");
-            pipeServer.StartServer(_info.MaxRecordingMinutes);
+            var npReader = new NamedPipesHelper(_info.SessionName, TimeSpan.FromMinutes(_info.MaxDurationInMinutes));
+            npReader.ReadPipe((line) => {
+
+                WriteLine(string.Format("Pipe: {0} Message {1} At {2}", _info.SessionName, line, DateTime.Now));
+                return !string.IsNullOrEmpty(line) && line.Trim().ToLowerInvariant().Equals("stop");
+
+            });
         }
 
         private static void SendCompleteNamedPipesSignal()
         {
-            var pipeServer = new NamedPipesServer(_info.SessionName, "complete");
-            pipeServer.SendMessageToPipe("complete", 30000, 5, 1000);
+            var npWriter = new NamedPipesHelper(_info.SessionName + "_BACK", TimeSpan.FromSeconds(30));
+            npWriter.SendMessage("Error 1", 5, 1500);
+            Thread.Sleep(1000);
+            npWriter.SendMessage("Error 2", 5, 1500);
+            Thread.Sleep(1000);
+            npWriter.SendMessage("Error 3", 5, 1500);
+            Thread.Sleep(1000);
+            npWriter.SendMessage("Error 4", 5, 1500);
+            Thread.Sleep(1000);
+            npWriter.SendMessage("complete", 5, 1500);
         }
 
         /// <summary>
