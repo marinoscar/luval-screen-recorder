@@ -50,9 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\luval.recorder.pipes\luval.recorder.pipes.csproj">
-      <Project>{b40e5498-b0ba-4c5a-ae7d-c32d2309384e}</Project>
-      <Name>luval.recorder.pipes</Name>
+    <ProjectReference Include="..\luval.recorder.fileshare\luval.recorder.fileshare.csproj">
+      <Project>{9a92e3c7-4c2f-41f8-a07a-b94efeac8cbd}</Project>
+      <Name>luval.recorder.fileshare</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

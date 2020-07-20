@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using luval.recorder.pipes;
+using luval.recorder.fileshare;
 
 namespace luval.recorder
 {
@@ -72,19 +72,19 @@ namespace luval.recorder
 
             Console.Title = String.Format("{0}: Recording", AppName);
 
-            if (!_info.UseNamedPipes)
+            if (!_info.UseShareFile)
                 WaitForConsoleSignal();
             else
             {
                 WriteLineInfo("Using pipe {0}", _info.SessionName);
-                WaitForNamedPipesSignal();
+                WaitForFileSignal();
                 WriteLineInfo("Stop signal recieved on pipe {0}", _info.SessionName);
             }
-            
+
             recorder.Stop();
-            
-            if (_info.UseNamedPipes)
-                SendCompleteNamedPipesSignal();
+
+            if (_info.UseShareFile)
+                SendCompleteSignal();
 
             Console.Title = String.Format("{0}: Completed", AppName);
 
@@ -101,29 +101,24 @@ namespace luval.recorder
         /// <summary>
         /// Waits for a named piped signal to finish the recording
         /// </summary>
-        private static void WaitForNamedPipesSignal()
+        private static void WaitForFileSignal()
         {
-            var npReader = new NamedPipesHelper(_info.SessionName, TimeSpan.FromMinutes(_info.MaxDurationInMinutes));
-            npReader.ReadPipe((line) => {
-
-                WriteLine(string.Format("Pipe: {0} Message {1} At {2}", _info.SessionName, line, DateTime.Now));
-                return !string.IsNullOrEmpty(line) && line.Trim().ToLowerInvariant().Equals("stop");
-
-            });
+            var fileShare = new ProcessShare(_info.SessionName, TimeSpan.FromMinutes(1));
+            try
+            {
+                fileShare.WaitForText("stop", TimeSpan.FromMinutes(_info.MaxRecordingMinutes));
+            }
+            catch (TimeoutException ex)
+            {
+                Trace.TraceError("Unable to capture stop signal after waiting {0} mins. Exception: {1}", _info.MaxRecordingMinutes, ex);
+            }
+            
         }
 
-        private static void SendCompleteNamedPipesSignal()
+        private static void SendCompleteSignal()
         {
-            var npWriter = new NamedPipesHelper(_info.SessionName + "_BACK", TimeSpan.FromSeconds(30));
-            npWriter.SendMessage("Error 1", 5, 1500);
-            Thread.Sleep(1000);
-            npWriter.SendMessage("Error 2", 5, 1500);
-            Thread.Sleep(1000);
-            npWriter.SendMessage("Error 3", 5, 1500);
-            Thread.Sleep(1000);
-            npWriter.SendMessage("Error 4", 5, 1500);
-            Thread.Sleep(1000);
-            npWriter.SendMessage("complete", 5, 1500);
+            var fileShare = new ProcessShare(_info.SessionName + "_BACK", TimeSpan.FromMinutes(1));
+            fileShare.WriteMessage("complete");
         }
 
         /// <summary>

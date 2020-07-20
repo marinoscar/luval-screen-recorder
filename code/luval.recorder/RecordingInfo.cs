@@ -13,12 +13,13 @@ namespace luval.recorder
     {
         public RecordingInfo()
         {
-            SessionName = "Luval-Recorder-Session";
+            SessionName = @"LUVAL-RECORDING";
             FileName = string.Format("{0}\\{1}-{2}.mp4", Environment.CurrentDirectory,  SessionName, Guid.NewGuid());
             MaxDurationInMinutes = 3;
             IntervalTimeInMs = 250;
             MaxRecordingMinutes = 120;
-            WindowMode = Program.SW_MINIMIZE;
+            WindowMode = Program.SW_HIDE;
+            UseShareFile = true;
         }
         /// <summary>
         /// Full file path for the recording
@@ -37,9 +38,9 @@ namespace luval.recorder
         /// </summary>
         public string SessionName { get; set; } 
         /// <summary>
-        /// Indicates if the session would open a named pipe to get messages about the recording
+        /// Indicates if the session would open a shared file to get messages about the recording
         /// </summary>
-        public bool UseNamedPipes { get; set; }
+        public bool UseShareFile { get; set; }
         /// <summary>
         /// The recording session would be active to a max of minutes
         /// </summary>

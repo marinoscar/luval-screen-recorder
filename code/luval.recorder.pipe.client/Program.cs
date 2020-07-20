@@ -1,4 +1,4 @@
-﻿using luval.recorder.pipes;
+﻿using luval.recorder.fileshare;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,32 +16,24 @@ namespace luval.recorder.pipe.client
         static void Main(string[] args)
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
-            var pipeName = "Luval-Recorder-Session";
-            Console.WriteLine("Enter the message to send to pipe {0}", pipeName);
-            
-            var npWriter = new NamedPipesHelper(pipeName, TimeSpan.FromMinutes(2d));
+            var sessionName = "LUVAL-RECORDING";
+            Console.WriteLine("Enter the message to send to file session {0}", sessionName);
             var message = Console.ReadLine();
-            //var result = SendMessageToPipe(pipeName, message, 30000, 5, 2000);
-            var result = npWriter.SendMessage(message, 5, 2000);
+            var fileShareSend = new ProcessShare(sessionName);
+            var result = fileShareSend.WriteMessage(message);
+
             if (!result)
             {
-                Console.WriteLine("Failed to send message {0} on pipe {1}", message, pipeName);
+                Console.WriteLine("Failed to send message {0} on session file {1}", message, sessionName);
                 return;
             }
             Console.WriteLine("Message succesful");
 
             Console.WriteLine("Waiting for completed signal");
 
-            var npReader = new NamedPipesHelper(pipeName + "_BACK", TimeSpan.FromMinutes(2d));
+            var fileShareRec = new ProcessShare(sessionName + "_BACK");
 
-            npReader.ReadPipe((line) => {
-                var expected = "complete";
-                var res = !string.IsNullOrEmpty(line) && line.Trim().ToLowerInvariant().Equals(expected.ToLowerInvariant());
-                Console.WriteLine("Line Recieved: {0}, Expected Value: {1}, The operation was: {2}", line.Trim(), expected, res);
-                return res;
-            });
-
-            //StartServer(pipeName + "_BACK", "complete", 2);
+            fileShareRec.WaitForText("complete", TimeSpan.FromMinutes(2));
 
             Console.WriteLine("Process completed");
 

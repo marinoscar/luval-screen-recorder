@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("luval.recorder.pipes")]
+[assembly: AssemblyTitle("luval.recorder.fileshare")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("luval.recorder.pipes")]
+[assembly: AssemblyProduct("luval.recorder.fileshare")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b40e5498-b0ba-4c5a-ae7d-c32d2309384e")]
+[assembly: Guid("9a92e3c7-4c2f-41f8-a07a-b94efeac8cbd")]
 
 // Version information for an assembly consists of the following four values:
 //
