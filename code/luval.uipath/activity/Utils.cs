@@ -43,5 +43,10 @@ namespace luval.uipath.recorder
 
             return "NO OWNER";
         }
+
+        public static string GetSessionName()
+        {
+            return string.Format("LUVAL-RECORDING-{0}-{1}", Environment.MachineName, Environment.UserName);
+        }
     }
 }
