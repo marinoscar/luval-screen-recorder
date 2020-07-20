@@ -42,6 +42,7 @@ namespace luval.recorder
         /// <param name="args">Arguments</param>
         static void Main(string[] args)
         {
+            CheckOnlyOneInstanceIsActive();
             var arguments = new ConsoleSwitches(args);
             _info = arguments.ToRecordingInfo();
 
@@ -154,17 +155,12 @@ namespace luval.recorder
             {
 
                 if (!createdMutex)
-                {
-                    var msg = string.Format("There is already another recording in progress for machine {0} and user {1} and the process cannot start", Environment.MachineName, Environment.UserName);                    WriteLineError();
-                    Trace.TraceError(msg);
-                    WriteErrorToEventLog(msg);
-
+                { 
+                    WriteErrorToEventLog(string.Format("There is already another recording in progress for machine {0} and user {1} and the process cannot start", Environment.MachineName, Environment.UserName));
+                    Application.Exit();
                 }
                 else
-                {
-                    // this is the process to actually run..
-                    // do application init stuff here
-                }
+                    WriteLine(string.Format("Starting instance ID {0} for process", sessionKey));
             }
         }
 
