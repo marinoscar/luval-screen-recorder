@@ -126,11 +126,45 @@ namespace luval.recorder
         /// </summary>
         private static void WaitForConsoleSignal()
         {
+            var task = Task.Run(() => {
+                DoWaitForConsoleSignal();
+            });
+            if (!task.Wait(TimeSpan.FromMinutes(_info.MaxRecordingMinutes)))
+                Trace.TraceWarning("Stoping recording after {0} minutes as it exceeded the max provided recording duration provided", _info.MaxRecordingMinutes);
+        }
+
+        private static void DoWaitForConsoleSignal()
+        {
             var isStopSignalRecieved = false;
             while (!isStopSignalRecieved)
             {
                 WriteLine("Enter the word STOP top finish the recording");
                 isStopSignalRecieved = Console.ReadLine().ToLowerInvariant() == "stop";
+            }
+        }
+
+        /// <summary>
+        /// Validates that only a single instance of the process is available
+        /// </summary>
+        private static void CheckOnlyOneInstanceIsActive()
+        {
+            var sessionKey = string.Format("{0}-{1}", Environment.MachineName, Environment.UserName);
+            bool createdMutex;
+            using (var processMutex = new Mutex(false, sessionKey, out createdMutex))
+            {
+
+                if (!createdMutex)
+                {
+                    var msg = string.Format("There is already another recording in progress for machine {0} and user {1} and the process cannot start", Environment.MachineName, Environment.UserName);                    WriteLineError();
+                    Trace.TraceError(msg);
+                    WriteErrorToEventLog(msg);
+
+                }
+                else
+                {
+                    // this is the process to actually run..
+                    // do application init stuff here
+                }
             }
         }
 
@@ -277,6 +311,9 @@ namespace luval.recorder
 
         public static void WriteErrorToEventLog(string errorMessage)
         {
+            WriteLineError(errorMessage);
+            if (!Trace.Listeners.Cast<TraceListener>().Any(i => i.GetType() == typeof(EventLogTraceListener)))
+                Trace.TraceError(errorMessage);
             using (var eventLog = new EventLog("Application"))
             {
                 eventLog.Source = "Application";
