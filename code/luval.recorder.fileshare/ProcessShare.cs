@@ -14,6 +14,11 @@ namespace luval.recorder.fileshare
 
         private readonly FileInfo _fileInfo;
 
+        /// <summary>
+        /// Indicates what's the max duration a message can be on a file in minutes
+        /// </summary>
+        public const int  MaxFileAgeInMinutes = 30;
+
 
         /// <summary>
         /// Creates a new instance of the class
@@ -105,8 +110,8 @@ namespace luval.recorder.fileshare
                 var text = DoReadMessage();
                 if (!string.IsNullOrWhiteSpace(text) && text.Trim().ToLowerInvariant().Equals(expectedText.Trim().ToLowerInvariant()))
                 {
-                    if(File.Exists(_fileInfo.FullName))
-                        _fileInfo.Delete();
+                    if (File.Exists(_fileInfo.FullName))
+                        TryDeleteFile();
                     return;
                 }
                 if (timeout < DateTime.UtcNow.Subtract(startUtc)) throw new TimeoutException(string.Format("Unable to complete the find {0} in file {1} after waiting {2}.", expectedText, _fileInfo.FullName, timeout));
@@ -129,7 +134,7 @@ namespace luval.recorder.fileshare
         private string DoReadMessage()
         {
             var result = default(string);
-            if (!File.Exists(_fileInfo.FullName)) return result;
+            if (!ValidateFile()) return result;
             try
             {
                 using (var stream = new StreamReader(_fileInfo.FullName))
@@ -191,6 +196,30 @@ namespace luval.recorder.fileshare
                 if (doFunc()) return true;
             }
             return false;
+        }
+
+        private bool ValidateFile()
+        {
+            if (!File.Exists(_fileInfo.FullName)) return false;
+            var a = File.GetLastWriteTimeUtc(_fileInfo.FullName);
+            if (DateTime.UtcNow.Subtract(File.GetLastWriteTimeUtc(_fileInfo.FullName)).TotalMinutes > MaxFileAgeInMinutes)
+            {
+                TryDeleteFile();
+                return false;
+            }
+            return true;
+        }
+
+        private void TryDeleteFile()
+        {
+            try
+            {
+                File.Delete(_fileInfo.FullName);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to delete file {0} with exception: {1}", _fileInfo.FullName, ex);
+            }
         }
 
     }
