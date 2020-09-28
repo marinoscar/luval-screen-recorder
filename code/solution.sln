@@ -7,11 +7,29 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder", "luval.rec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.pipe.client", "luval.recorder.pipe.client\luval.recorder.pipe.client.csproj", "{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.uipath.recorder", "luval.uipath\activity\luval.uipath.recorder.csproj", "{F888EB06-412D-4B26-86BE-8301A518C50C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.fileshare", "luval.recorder.fileshare\luval.recorder.fileshare.csproj", "{9A92E3C7-4C2F-41F8-A07A-B94EFEAC8CBD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Luval.UiPath.Recorder", "Luval.UiPath.Recorder", "{CE147CBA-82DA-4EE3-A90E-AA1A2D6F3833}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder", "Luval.UiPath.Recorder\Luval.UiPath.Recorder\Luval.UiPath.Recorder.csproj", "{69D73FB4-3824-49A2-91C5-06AB486885E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder.Activities", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities\Luval.UiPath.Recorder.Activities.csproj", "{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder.Activities.Design", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities.Design\Luval.UiPath.Recorder.Activities.Design.csproj", "{7487E143-E12E-4BED-A047-2B2D27EF4994}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{B045CAA2-A1CB-45A9-BDDD-CBAD8C023207}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UiPath.Shared.Activities", "Shared\UiPath.Shared.Activities\UiPath.Shared.Activities.shproj", "{4546856D-EA50-45C6-9419-EEEACB5A80AA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UiPath.Shared.Activities.Design", "Shared\UiPath.Shared.Activities.Design\UiPath.Shared.Activities.Design.shproj", "{DF9C43F0-ADD3-4FBF-995E-84B92F9CBF25}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared\UiPath.Shared.Activities\UiPath.Shared.Activities.projitems*{4546856d-ea50-45c6-9419-eeeacb5a80aa}*SharedItemsImports = 13
+		Shared\UiPath.Shared.Activities\UiPath.Shared.Activities.projitems*{4e7f6bd3-df9a-4824-a5de-df15573cd566}*SharedItemsImports = 5
+		Shared\UiPath.Shared.Activities.Design\UiPath.Shared.Activities.Design.projitems*{7487e143-e12e-4bed-a047-2b2d27ef4994}*SharedItemsImports = 5
+		Shared\UiPath.Shared.Activities.Design\UiPath.Shared.Activities.Design.projitems*{df9c43f0-add3-4fbf-995e-84b92f9cbf25}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -25,17 +43,32 @@ Global
 		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21F8FFE7-D9FB-4B12-B74B-C45810D4B0EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F888EB06-412D-4B26-86BE-8301A518C50C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F888EB06-412D-4B26-86BE-8301A518C50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F888EB06-412D-4B26-86BE-8301A518C50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F888EB06-412D-4B26-86BE-8301A518C50C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9A92E3C7-4C2F-41F8-A07A-B94EFEAC8CBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9A92E3C7-4C2F-41F8-A07A-B94EFEAC8CBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A92E3C7-4C2F-41F8-A07A-B94EFEAC8CBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A92E3C7-4C2F-41F8-A07A-B94EFEAC8CBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69D73FB4-3824-49A2-91C5-06AB486885E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D73FB4-3824-49A2-91C5-06AB486885E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D73FB4-3824-49A2-91C5-06AB486885E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D73FB4-3824-49A2-91C5-06AB486885E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{69D73FB4-3824-49A2-91C5-06AB486885E7} = {CE147CBA-82DA-4EE3-A90E-AA1A2D6F3833}
+		{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566} = {CE147CBA-82DA-4EE3-A90E-AA1A2D6F3833}
+		{7487E143-E12E-4BED-A047-2B2D27EF4994} = {CE147CBA-82DA-4EE3-A90E-AA1A2D6F3833}
+		{4546856D-EA50-45C6-9419-EEEACB5A80AA} = {B045CAA2-A1CB-45A9-BDDD-CBAD8C023207}
+		{DF9C43F0-ADD3-4FBF-995E-84B92F9CBF25} = {B045CAA2-A1CB-45A9-BDDD-CBAD8C023207}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C3A5D65-B7BD-4CE4-8EBA-BDDB2C38DEC5}
