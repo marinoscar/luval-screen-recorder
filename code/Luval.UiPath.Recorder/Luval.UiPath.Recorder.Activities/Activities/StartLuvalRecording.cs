@@ -1,5 +1,7 @@
 using System;
 using System.Activities;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Luval.UiPath.Recorder.Activities.Properties;
@@ -30,12 +32,12 @@ namespace Luval.UiPath.Recorder.Activities
         [LocalizedDisplayName(nameof(Resources.StartLuvalRecording_RecordingDurationInMinutes_DisplayName))]
         [LocalizedDescription(nameof(Resources.StartLuvalRecording_RecordingDurationInMinutes_Description))]
         [LocalizedCategory(nameof(Resources.Input_Category))]
-        public InArgument<string> RecordingDurationInMinutes { get; set; }
+        public InArgument<double?> RecordingDurationInMinutes { get; set; }
 
         [LocalizedDisplayName(nameof(Resources.StartLuvalRecording_MaxRecordingDurationInMinutes_DisplayName))]
         [LocalizedDescription(nameof(Resources.StartLuvalRecording_MaxRecordingDurationInMinutes_Description))]
         [LocalizedCategory(nameof(Resources.Input_Category))]
-        public InArgument<string> MaxRecordingDurationInMinutes { get; set; }
+        public InArgument<double?> MaxRecordingDurationInMinutes { get; set; }
 
         #endregion
 
@@ -60,14 +62,41 @@ namespace Luval.UiPath.Recorder.Activities
 
         protected override async Task<Action<AsyncCodeActivityContext>> ExecuteAsync(AsyncCodeActivityContext context, CancellationToken cancellationToken)
         {
+
+            var dirInfo = new DirectoryInfo(Utils.GetExecDirLocation());
+            Trace.TraceInformation("Starting from {0}", Utils.GetExecDirLocation());
+
             // Inputs
             var videofolderlocation = VideoFolderLocation.Get(context);
             var recordingdurationinminutes = RecordingDurationInMinutes.Get(context);
             var maxrecordingdurationinminutes = MaxRecordingDurationInMinutes.Get(context);
-    
-            ///////////////////////////
-            // Add execution logic HERE
-            ///////////////////////////
+            var sessionName = Utils.GetSessionName();
+            var libraryFile = new FileInfo(dirInfo.FullName + @"\recorder.bin\luval.recorder.exe");
+
+            if (!libraryFile.Exists) throw new InvalidOperationException(string.Format("Current directory {0} and unable to locate dependency {1}", dirInfo.FullName,  libraryFile.FullName));
+
+            if (maxrecordingdurationinminutes == null) maxrecordingdurationinminutes = 120d;
+            if (recordingdurationinminutes == null) recordingdurationinminutes = 3d;
+
+            if (recordingdurationinminutes < 0.99 || recordingdurationinminutes > 20) throw new ArgumentOutOfRangeException("The RecordingDurationInMinutes should be greater or equal than 1 and less than 20");
+
+            var videoFile = Utils.GetVideoFileName(videofolderlocation);
+
+            Trace.TraceInformation("Starting Luval Recording with Session: {0} Duration: {1} Max Duration: {2}", sessionName, recordingdurationinminutes, maxrecordingdurationinminutes);
+
+            var args = new ProcessStartInfo() {
+                FileName = libraryFile.FullName,
+                Arguments = string.Format("/session {0} /outputFile {1} /duration {2} /maxRecording {3} /useShareFile y /windowMode 6", sessionName, videoFile.FullName, recordingdurationinminutes, maxrecordingdurationinminutes)
+            }; 
+
+            try
+            {
+                Process.Start(args);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             // Outputs
             return (ctx) => {

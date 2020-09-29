@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using luval.recorder.fileshare;
+using System.Reflection;
 
 namespace luval.recorder
 {
@@ -42,6 +43,7 @@ namespace luval.recorder
         /// <param name="args">Arguments</param>
         static void Main(string[] args)
         {
+
             CheckOnlyOneInstanceIsActive();
             var arguments = new ConsoleSwitches(args);
             _info = arguments.ToRecordingInfo();

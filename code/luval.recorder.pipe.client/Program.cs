@@ -15,6 +15,7 @@ namespace luval.recorder.pipe.client
     {
         static void Main(string[] args)
         {
+            
             Trace.Listeners.Add(new ConsoleTraceListener());
             var sessionName = "LUVAL-RECORDING";
             Console.WriteLine("Enter the message to send to file session {0}", sessionName);

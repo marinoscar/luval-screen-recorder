@@ -1,7 +1,9 @@
 using System;
 using System.Activities;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using luval.recorder.fileshare;
 using Luval.UiPath.Recorder.Activities.Properties;
 using UiPath.Shared.Activities;
 using UiPath.Shared.Activities.Localization;
@@ -22,15 +24,6 @@ namespace Luval.UiPath.Recorder.Activities
         [LocalizedDescription(nameof(Resources.ContinueOnError_Description))]
         public override InArgument<bool> ContinueOnError { get; set; }
 
-        [LocalizedDisplayName(nameof(Resources.StopLuvalRecording_FileName_DisplayName))]
-        [LocalizedDescription(nameof(Resources.StopLuvalRecording_FileName_Description))]
-        [LocalizedCategory(nameof(Resources.Output_Category))]
-        public OutArgument<string> FileName { get; set; }
-
-        [LocalizedDisplayName(nameof(Resources.StopLuvalRecording_ErrorMessage_DisplayName))]
-        [LocalizedDescription(nameof(Resources.StopLuvalRecording_ErrorMessage_Description))]
-        [LocalizedCategory(nameof(Resources.Output_Category))]
-        public OutArgument<string> ErrorMessage { get; set; }
 
         #endregion
 
@@ -54,17 +47,28 @@ namespace Luval.UiPath.Recorder.Activities
 
         protected override async Task<Action<AsyncCodeActivityContext>> ExecuteAsync(AsyncCodeActivityContext context, CancellationToken cancellationToken)
         {
-            // Inputs
-    
-            ///////////////////////////
-            // Add execution logic HERE
-            ///////////////////////////
-
+            SendStopSignal();
+            WaitForComplete();
             // Outputs
             return (ctx) => {
-                FileName.Set(ctx, null);
-                ErrorMessage.Set(ctx, null);
+
             };
+        }
+
+        private static void WaitForComplete()
+        {
+            var messageShare = new ProcessShare(Utils.GetSessionName() + "_BACK");
+            Trace.TraceInformation("Waiting on session {0} for message", messageShare.SessionName);
+
+            messageShare.WaitForText("complete", TimeSpan.FromMinutes(10));
+        }
+
+        private static void SendStopSignal()
+        {
+            var messageShare = new ProcessShare(Utils.GetSessionName());
+            Trace.TraceInformation("Sending stop signal for recording on session {0}", messageShare.SessionName);
+            messageShare.WriteMessage("stop");
+            Trace.TraceInformation("Stop signal for session {0} completed", messageShare.SessionName);
         }
 
         #endregion
