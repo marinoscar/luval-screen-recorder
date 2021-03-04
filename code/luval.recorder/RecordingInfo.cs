@@ -20,6 +20,7 @@ namespace luval.recorder
             MaxRecordingMinutes = 120;
             WindowMode = Program.SW_HIDE;
             UseShareFile = true;
+            IsRollingFile = true;
         }
         /// <summary>
         /// Full file path for the recording
@@ -54,5 +55,10 @@ namespace luval.recorder
         /// Indicates if all messages sent to the console would be Traced in the event viewer
         /// </summary>
         public bool LogInfoMessages { get; set; }
+
+        /// <summary>
+        /// Indicates if the recording would be on a rolling file
+        /// </summary>
+        public bool IsRollingFile { get; set; }
     }
 }

@@ -11,13 +11,11 @@ using System.Timers;
 
 namespace luval.recorder
 {
-    public class Recorder
+    public class Recorder : IDisposable
     {
         private Size _screenSize;
-        private double _minutesElapsed;
-        private DateTime _startUtc;
         private RecordingInfo _info;
-
+        private VideoFileWriter _writer;
 
         public RollingList<byte[]> Frames { get; private set; }
         public Timer Timer { get; private set; }
@@ -33,10 +31,19 @@ namespace luval.recorder
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            var rec = new Rectangle(0, 0, _screenSize.Width, _screenSize.Height);
 
-            using (Bitmap bp = new Bitmap(rec.Width,
-                                            rec.Height))
+            if (_info.IsRollingFile)
+                RecordRollingFile();
+            else
+                RecordToWriter();
+        }
+
+
+        private byte[] GetScreenBytes()
+        {
+            var res = new List<byte>();
+            var rec = new Rectangle(0, 0, _screenSize.Width, _screenSize.Height);
+            using (var bp = new Bitmap(rec.Width, rec.Height))
             {
                 using (Graphics g = Graphics.FromImage(bp))
                 {
@@ -44,12 +51,26 @@ namespace luval.recorder
                     using (var stream = new MemoryStream())
                     {
                         bp.Save(stream, ImageFormat.Jpeg);
-                        Frames.Add(stream.ToArray());
+                        res.AddRange(stream.ToArray());
                     }
-                    _minutesElapsed = DateTime.UtcNow.Subtract(_startUtc).TotalMinutes;
                 }
             }
+            return res.ToArray();
         }
+
+        private void RecordToWriter()
+        {
+            if (_writer == null)
+                _writer = CreateVideoWriter();
+            var img = Image.FromStream(new MemoryStream(GetScreenBytes()));
+            _writer.WriteVideoFrame(new Bitmap(img));
+        }
+
+        private void RecordRollingFile()
+        {
+            Frames.Add(GetScreenBytes());
+        }
+
 
         public void Start(RecordingInfo info)
         {
@@ -67,15 +88,12 @@ namespace luval.recorder
             var arraySize = ((1000 / Timer.Interval) * info.MaxDurationInMinutes) * 60;
             Frames = new RollingList<byte[]>((int)arraySize);
             Timer.Start();
-            _startUtc = DateTime.UtcNow;
         }
 
-        private void CreateFile()
+        private void SaveRollingFile()
         {
-            var frameRate = (int)(1000 / (Timer.Interval));
-            using (var writer = new VideoFileWriter())
+            using (var writer = CreateVideoWriter())
             {
-                writer.Open(_info.FileName, _screenSize.Width, _screenSize.Height, frameRate, VideoCodec.MPEG4);
                 foreach (var frame in Frames)
                 {
                     using (var stream = new MemoryStream(frame))
@@ -85,7 +103,15 @@ namespace luval.recorder
                     }
                 }
                 writer.Close();
-            }  
+            }
+        }
+
+        private VideoFileWriter CreateVideoWriter()
+        {
+            var frameRate = (int)(1000 / (Timer.Interval));
+            var writer = new VideoFileWriter();
+            writer.Open(_info.FileName, _screenSize.Width, _screenSize.Height, frameRate, VideoCodec.MPEG4);
+            return writer;
         }
 
         public void Stop()
@@ -94,7 +120,27 @@ namespace luval.recorder
             Timer.Stop();
             Timer.Dispose();
             System.Threading.Thread.Sleep(1000);
-            CreateFile();
+            if (_info.IsRollingFile)
+                SaveRollingFile();
+            else
+                CloseWriter();
+        }
+
+        private void CloseWriter()
+        {
+            if (_writer == null) return;
+            if(_writer.IsOpen)
+                _writer.Close();
+            _writer.Dispose();
+            _writer = null;
+        }
+
+        public void Dispose()
+        {
+            CloseWriter();
+            Frames = null;
+            Timer.Dispose();
+            Timer = null;
         }
     }
 }
