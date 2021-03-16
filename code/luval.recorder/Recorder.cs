@@ -17,6 +17,7 @@ namespace luval.recorder
         private RecordingInfo _info;
         private VideoFileWriter _writer;
         private uint _frameIndex = 0;
+        private DateTime _startTime;
 
         public RollingList<byte[]> Frames { get; private set; }
         public Timer Timer { get; private set; }
@@ -37,6 +38,9 @@ namespace luval.recorder
                 RecordRollingFile();
             else
                 RecordToWriter();
+
+            if (DateTime.UtcNow.Subtract(_startTime).TotalMinutes > _info.MaxRecordingMinutes && _info.MaxRecordingMinutes > 0)
+                Stop();
         }
 
 
@@ -90,6 +94,7 @@ namespace luval.recorder
             var arraySize = ((1000 / Timer.Interval) * info.RollingDurationInMinutes) * 60;
             Frames = new RollingList<byte[]>((int)arraySize);
             Timer.Start();
+            _startTime = DateTime.UtcNow;
         }
 
         private void SaveRollingFile()
