@@ -18,9 +18,19 @@ namespace luval.recorder.fileshare
             var lines = new List<string>();
             foreach (var item in this)
             {
-                lines.Add(string.Format("{0};{1}", item.Key.Replace(";", "&^!"), item.Value.Replace(";","&^!")));
+                lines.Add(string.Format("{0};{1}", Encode(item.Key), Encode(item.Value)));
             }
             return string.Join(Environment.NewLine, lines);
+        }
+
+        private static string Encode(string value)
+        {
+            return value.Replace(";", "&^%").Replace(Environment.NewLine, "&^*");
+        }
+
+        private static string Decode(string value)
+        {
+            return value.Replace("&^%", ";").Replace("&^*", Environment.NewLine);
         }
 
         /// <summary>
@@ -37,7 +47,7 @@ namespace luval.recorder.fileshare
                 if (string.IsNullOrWhiteSpace(item) || !item.Contains(";")) continue;
                 var content = item.Split(";".ToCharArray());
                 if (content.Length <= 1) continue;
-                res[content[0]] = content[1];
+                res[Decode(content[0])] = Decode(content[1]);
             }
             return res;
         }
