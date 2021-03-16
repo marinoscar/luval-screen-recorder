@@ -63,6 +63,7 @@ namespace luval.recorder.fileshare
             var dirInfo = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Luval-Recording"));
             if (!dirInfo.Exists) dirInfo.Create();
             _fileInfo = new FileInfo(Path.Combine(dirInfo.FullName, string.Format("{0}-PSI.bin", sessionName)));
+            TryDeleteFile();
         }
 
         public string SessionName { get; private set; }
@@ -108,7 +109,7 @@ namespace luval.recorder.fileshare
             return WaitForText((text) => {
                 return !string.IsNullOrWhiteSpace(text) && 
                        !string.IsNullOrWhiteSpace(expectedText) && 
-                       text.ToLowerInvariant().Equals(expectedText.ToLowerInvariant());
+                       text.Trim().ToLowerInvariant().Equals(expectedText.Trim().ToLowerInvariant());
             }, timeout, waitCycleInMs);
         }
 
