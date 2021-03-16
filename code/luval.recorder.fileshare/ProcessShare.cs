@@ -17,7 +17,7 @@ namespace luval.recorder.fileshare
         /// <summary>
         /// Indicates what's the max duration a message can be on a file in minutes
         /// </summary>
-        public const int  MaxFileAgeInMinutes = 30;
+        public const int MaxFileAgeInMinutes = 30;
 
 
         /// <summary>
@@ -104,17 +104,33 @@ namespace luval.recorder.fileshare
         /// <exception cref="TimeoutException">After the operation is not finding the text</exception>
         public void WaitForText(string expectedText, TimeSpan timeout, int waitCycleInMs)
         {
+            WaitForText((text) => {
+                return !string.IsNullOrWhiteSpace(text) && 
+                       !string.IsNullOrWhiteSpace(expectedText) && 
+                       text.ToLowerInvariant().Equals(expectedText.ToLowerInvariant());
+            }, timeout, waitCycleInMs);
+        }
+
+        /// <summary>
+        /// Wait for the file to contain text in it to continue the execution
+        /// </summary>
+        /// <param name="match">function to use to match the value in the text</param>
+        /// <param name="timeout">The max time to wait before sending an exception</param>
+        /// <param name="waitCycleInMs">The wait between every check</param>
+        /// <exception cref="TimeoutException">After the operation is not finding the text</exception>
+        public void WaitForText(Func<string, bool> match, TimeSpan timeout, int waitCycleInMs)
+        {
             var startUtc = DateTime.UtcNow;
             while (true)
             {
                 var text = DoReadMessage();
-                if (!string.IsNullOrWhiteSpace(text) && text.Trim().ToLowerInvariant().Equals(expectedText.Trim().ToLowerInvariant()))
+                if (!string.IsNullOrWhiteSpace(text) && match(text))
                 {
                     if (File.Exists(_fileInfo.FullName))
                         TryDeleteFile();
                     return;
                 }
-                if (timeout < DateTime.UtcNow.Subtract(startUtc)) throw new TimeoutException(string.Format("Unable to complete the find {0} in file {1} after waiting {2}.", expectedText, _fileInfo.FullName, timeout));
+                if (timeout < DateTime.UtcNow.Subtract(startUtc)) throw new TimeoutException(string.Format("Unable to complete the match in file {0} after waiting {1}.", _fileInfo.FullName, timeout));
                 Thread.Sleep(waitCycleInMs);
             }
         }
