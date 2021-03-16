@@ -115,13 +115,15 @@ namespace luval.recorder
             {
                 Trace.TraceError("Unable to capture stop signal after waiting {0} mins. Exception: {1}", _info.MaxRecordingMinutes, ex);
             }
-            
         }
 
         private static void SendCompleteSignal()
         {
             var fileShare = new ProcessShare(_info.SessionName + "_BACK", TimeSpan.FromMinutes(1));
-            fileShare.WriteMessage("complete");
+            var processData = new ProcessShareData();
+            processData["status"] = "complete";
+            processData["filename"] = _info.FileName;
+            fileShare.WriteMessage(processData.ToString());
         }
 
         /// <summary>
