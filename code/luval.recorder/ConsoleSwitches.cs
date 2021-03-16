@@ -52,6 +52,7 @@ namespace luval.recorder
             var res = new RecordingInfo();
             if (ContainsSwitch("/session")) res.SessionName = this["/session"];
             if (ContainsSwitch("/outputFile")) res.FileName = this["/outputFile"];
+            if (ContainsSwitch("/isRolling")) res.IsRollingFile = !string.IsNullOrEmpty(this["/isRolling"]) && this["/isRolling"].ToLowerInvariant() == "false";
             if (ContainsSwitch("/duration")) res.RollingDurationInMinutes = Convert.ToInt32(this["/duration"]);
             if (ContainsSwitch("/interval")) res.IntervalTimeInMs = Convert.ToInt32(this["/interval"]);
             if (ContainsSwitch("/maxRecording")) res.MaxRecordingMinutes = Convert.ToInt32(this["/maxRecording"]);
