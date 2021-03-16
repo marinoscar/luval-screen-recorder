@@ -18,7 +18,7 @@ namespace luval.recorder
             RollingDurationInMinutes = 3;
             IntervalTimeInMs = 250;
             MaxRecordingMinutes = 120;
-            WindowMode = Program.SW_HIDE;
+            WindowMode = Program.SW_MINIMIZE;
             UseShareFile = true;
             IsRollingFile = true;
         }
