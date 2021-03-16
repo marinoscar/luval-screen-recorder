@@ -22,5 +22,24 @@ namespace luval.recorder.fileshare
             }
             return string.Join(Environment.NewLine, lines);
         }
+
+        /// <summary>
+        /// Creates a new instance of the class with a serialized string
+        /// </summary>
+        /// <param name="value">String to deserialize</param>
+        /// <returns>A new instance of <see cref="ProcessShare"/></returns>
+        public static ProcessShareData FromString(string value)
+        {
+            var res = new ProcessShareData();
+            var lines = value.Split(Environment.NewLine.ToCharArray());
+            foreach (var item in lines)
+            {
+                if (string.IsNullOrWhiteSpace(item) || !item.Contains(";")) continue;
+                var content = item.Split(";".ToCharArray());
+                if (content.Length <= 1) continue;
+                res[content[0]] = content[1];
+            }
+            return res;
+        }
     }
 }
