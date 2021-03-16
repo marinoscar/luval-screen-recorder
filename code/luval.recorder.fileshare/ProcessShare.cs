@@ -70,7 +70,6 @@ namespace luval.recorder.fileshare
         public int RetryCount { get; private set; }
         public int WaitBetweenRetryInMs { get; private set; }
 
-
         /// <summary>
         /// Writes a message to the shared file
         /// </summary>
@@ -89,10 +88,11 @@ namespace luval.recorder.fileshare
         /// </summary>
         /// <param name="expectedText">The expected text</param>
         /// <param name="timeout">The max time to wait before sending an exception</param>
+        /// <returns>Returns the contents of the file</returns>
         /// <exception cref="TimeoutException">After the operation is not finding the text</exception>
-        public void WaitForText(string expectedText, TimeSpan timeout)
+        public string WaitForText(string expectedText, TimeSpan timeout)
         {
-            WaitForText(expectedText, timeout, 1000);
+            return WaitForText(expectedText, timeout, 1000);
         }
 
         /// <summary>
@@ -101,10 +101,11 @@ namespace luval.recorder.fileshare
         /// <param name="expectedText">The expected text</param>
         /// <param name="timeout">The max time to wait before sending an exception</param>
         /// <param name="waitCycleInMs">The wait between every check</param>
+        /// <returns>Returns the contents of the file</returns>
         /// <exception cref="TimeoutException">After the operation is not finding the text</exception>
-        public void WaitForText(string expectedText, TimeSpan timeout, int waitCycleInMs)
+        public string WaitForText(string expectedText, TimeSpan timeout, int waitCycleInMs)
         {
-            WaitForText((text) => {
+            return WaitForText((text) => {
                 return !string.IsNullOrWhiteSpace(text) && 
                        !string.IsNullOrWhiteSpace(expectedText) && 
                        text.ToLowerInvariant().Equals(expectedText.ToLowerInvariant());
@@ -117,8 +118,9 @@ namespace luval.recorder.fileshare
         /// <param name="match">function to use to match the value in the text</param>
         /// <param name="timeout">The max time to wait before sending an exception</param>
         /// <param name="waitCycleInMs">The wait between every check</param>
+        /// <returns>Returns the contents of the file</returns>
         /// <exception cref="TimeoutException">After the operation is not finding the text</exception>
-        public void WaitForText(Func<string, bool> match, TimeSpan timeout, int waitCycleInMs)
+        public string WaitForText(Func<string, bool> match, TimeSpan timeout, int waitCycleInMs)
         {
             var startUtc = DateTime.UtcNow;
             while (true)
@@ -128,7 +130,7 @@ namespace luval.recorder.fileshare
                 {
                     if (File.Exists(_fileInfo.FullName))
                         TryDeleteFile();
-                    return;
+                    return text;
                 }
                 if (timeout < DateTime.UtcNow.Subtract(startUtc)) throw new TimeoutException(string.Format("Unable to complete the match in file {0} after waiting {1}.", _fileInfo.FullName, timeout));
                 Thread.Sleep(waitCycleInMs);
