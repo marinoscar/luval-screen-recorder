@@ -307,8 +307,6 @@ namespace luval.recorder
             WriteErrorToEventLog(message);
         }
 
-        #endregion
-
         public static void WriteErrorToEventLog(string errorMessage)
         {
             WriteLineError(errorMessage);
@@ -320,5 +318,7 @@ namespace luval.recorder
                 eventLog.WriteEntry(string.Format("{0}:{1}", AppName, errorMessage), EventLogEntryType.Error, 101, 1);
             }
         }
+
+        #endregion
     }
 }
