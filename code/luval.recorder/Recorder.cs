@@ -75,7 +75,7 @@ namespace luval.recorder
         public void Start(RecordingInfo info)
         {
             if (info.IntervalTimeInMs < 10 || info.IntervalTimeInMs > 1000) throw new ArgumentOutOfRangeException(string.Format("Interval has to be between 10 and 1000"));
-            if (info.MaxDurationInMinutes <= 0 || info.MaxDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("Duration has to be between 1 and 30"));
+            if (info.RollingDurationInMinutes <= 0 || info.RollingDurationInMinutes > 30) throw new ArgumentOutOfRangeException(string.Format("Duration has to be between 1 and 30"));
             if (info.UseShareFile && string.IsNullOrWhiteSpace(info.SessionName)) throw new ArgumentOutOfRangeException(string.Format("Session name cannot be null or empty if named pipes are going to be used"));
 
             _info = info;
@@ -85,7 +85,7 @@ namespace luval.recorder
             _screenSize.Height = _screenSize.Height % 2 == 0 ? _screenSize.Height : _screenSize.Height - 1;
 
             Timer.Interval = info.IntervalTimeInMs;
-            var arraySize = ((1000 / Timer.Interval) * info.MaxDurationInMinutes) * 60;
+            var arraySize = ((1000 / Timer.Interval) * info.RollingDurationInMinutes) * 60;
             Frames = new RollingList<byte[]>((int)arraySize);
             Timer.Start();
         }

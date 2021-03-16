@@ -15,7 +15,7 @@ namespace luval.recorder
         {
             SessionName = string.Format("{0}-{1}-RECORDING", Environment.MachineName, Environment.UserName);
             FileName = string.Format("{0}\\{1}-{2}.mp4", Environment.CurrentDirectory,  SessionName, Guid.NewGuid());
-            MaxDurationInMinutes = 3;
+            RollingDurationInMinutes = 3;
             IntervalTimeInMs = 250;
             MaxRecordingMinutes = 120;
             WindowMode = Program.SW_HIDE;
@@ -27,9 +27,9 @@ namespace luval.recorder
         /// </summary>
         public string FileName { get; set; }
         /// <summary>
-        /// Max number of minutes for the screen recording
+        /// Max number of minutes for rolling screen recording
         /// </summary>
-        public int MaxDurationInMinutes { get; set; }
+        public int RollingDurationInMinutes { get; set; }
         /// <summary>
         /// Number of milliseconds between each screen capture 
         /// </summary>
