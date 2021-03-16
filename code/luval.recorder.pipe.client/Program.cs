@@ -34,10 +34,18 @@ namespace luval.recorder.pipe.client
 
             var fileShareRec = new ProcessShare(sessionName + "_BACK");
 
-            fileShareRec.WaitForText("complete", TimeSpan.FromMinutes(2));
+            fileShareRec.WaitForText(ValidateMessage, TimeSpan.FromMinutes(2), 1000);
 
             Console.WriteLine("Process completed");
 
+        }
+
+        private static bool ValidateMessage(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            var data = ProcessShareData.FromString(value);
+            if (data.Keys.Count <= 0) return false;
+            return data.ContainsKey("status") && data["status"] == "complete";
         }
 
         private static bool SendMessageToPipe(string pipe, string message, int timeoutInMs, int connectionRetries, int retryWaitInMs)
