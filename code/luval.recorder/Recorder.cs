@@ -16,6 +16,7 @@ namespace luval.recorder
         private Size _screenSize;
         private RecordingInfo _info;
         private VideoFileWriter _writer;
+        private uint _frameIndex = 0;
 
         public RollingList<byte[]> Frames { get; private set; }
         public Timer Timer { get; private set; }
@@ -63,7 +64,8 @@ namespace luval.recorder
             if (_writer == null)
                 _writer = CreateVideoWriter();
             var img = Image.FromStream(new MemoryStream(GetScreenBytes()));
-            _writer.WriteVideoFrame(new Bitmap(img));
+            _writer.WriteVideoFrame(new Bitmap(img), _frameIndex);
+            _frameIndex++;
         }
 
         private void RecordRollingFile()
@@ -129,7 +131,7 @@ namespace luval.recorder
         private void CloseWriter()
         {
             if (_writer == null) return;
-            if(_writer.IsOpen)
+            if (_writer.IsOpen)
                 _writer.Close();
             _writer.Dispose();
             _writer = null;
