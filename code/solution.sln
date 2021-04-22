@@ -11,17 +11,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.fileshare", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Luval.UiPath.Recorder", "Luval.UiPath.Recorder", "{CE147CBA-82DA-4EE3-A90E-AA1A2D6F3833}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder", "Luval.UiPath.Recorder\Luval.UiPath.Recorder\Luval.UiPath.Recorder.csproj", "{69D73FB4-3824-49A2-91C5-06AB486885E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luval.UiPath.Recorder", "Luval.UiPath.Recorder\Luval.UiPath.Recorder\Luval.UiPath.Recorder.csproj", "{69D73FB4-3824-49A2-91C5-06AB486885E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder.Activities", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities\Luval.UiPath.Recorder.Activities.csproj", "{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luval.UiPath.Recorder.Activities", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities\Luval.UiPath.Recorder.Activities.csproj", "{4E7F6BD3-DF9A-4824-A5DE-DF15573CD566}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luval.UiPath.Recorder.Activities.Design", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities.Design\Luval.UiPath.Recorder.Activities.Design.csproj", "{7487E143-E12E-4BED-A047-2B2D27EF4994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luval.UiPath.Recorder.Activities.Design", "Luval.UiPath.Recorder\Luval.UiPath.Recorder.Activities.Design\Luval.UiPath.Recorder.Activities.Design.csproj", "{7487E143-E12E-4BED-A047-2B2D27EF4994}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{B045CAA2-A1CB-45A9-BDDD-CBAD8C023207}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UiPath.Shared.Activities", "Shared\UiPath.Shared.Activities\UiPath.Shared.Activities.shproj", "{4546856D-EA50-45C6-9419-EEEACB5A80AA}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "UiPath.Shared.Activities.Design", "Shared\UiPath.Shared.Activities.Design\UiPath.Shared.Activities.Design.shproj", "{DF9C43F0-ADD3-4FBF-995E-84B92F9CBF25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "luval.recorder.client", "luval.recorder.client\luval.recorder.client.csproj", "{1E87941C-BA39-415F-B3C5-72A4261787F6}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -59,6 +61,10 @@ Global
 		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7487E143-E12E-4BED-A047-2B2D27EF4994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E87941C-BA39-415F-B3C5-72A4261787F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E87941C-BA39-415F-B3C5-72A4261787F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E87941C-BA39-415F-B3C5-72A4261787F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E87941C-BA39-415F-B3C5-72A4261787F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
